@@ -646,11 +646,10 @@
           :dimension_options))))
 
 (defn- dimension-options-for-field [response field-name]
-  (let [formatted-field-name (data/format-name field-name)]
-    (->> response
-         :fields
-         (m/find-first #(= formatted-field-name (:name %)))
-         :dimension_options)))
+  (->> response
+       :fields
+       (m/find-first #(.equalsIgnoreCase field-name (:name %)))
+       :dimension_options))
 
 (defn- extract-dimension-options
   "For the given `FIELD-NAME` find it's dimension_options following

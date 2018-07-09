@@ -257,7 +257,7 @@
    :type :query
    :query {:source-table (str "card__" (u/get-id card-or-card-id))
            :aggregation  [:count]
-           :breakout     [(ql/binning-strategy (ql/field-literal "LATITUDE" :type/Float) :num-bins 20)]}})
+           :breakout     [(ql/binning-strategy (ql/field-literal (data/format-name :latitude) :type/Float) :num-bins 20)]}})
 
 ;; Binning should be allowed on nested queries that have result metadata
 (datasets/expect-with-engines (non-timeseries-engines-with-feature :binning)
@@ -266,9 +266,10 @@
                                             :type :query
                                             :query {:source-query {:source-table (data/id :venues)}}}
                             :result_metadata (mapv field->result-metadata (db/select Field :table_id (data/id :venues)))}]
-    (-> (nested-venues-query card)
-        qp/process-query
-        rows)))
+    (->> (nested-venues-query card)
+         qp/process-query
+         rows
+         (format-rows-by [(partial u/round-to-decimals 1) int]))))
 
 ;; Binning is not supported when there is no fingerprint to determine boundaries
 (datasets/expect-with-engines (non-timeseries-engines-with-feature :binning)
